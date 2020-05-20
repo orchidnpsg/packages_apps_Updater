@@ -71,12 +71,18 @@ public class UpdatesListAdapter extends RecyclerView.Adapter<UpdatesListAdapter.
 
     private static final String TAG = "UpdateListAdapter";
 
+    private static final int BATTERY_PLUGGED_ANY = BatteryManager.BATTERY_PLUGGED_AC
+            | BatteryManager.BATTERY_PLUGGED_USB
+            | BatteryManager.BATTERY_PLUGGED_WIRELESS;
+
     private final float mAlphaDisabledValue;
 
     private List<String> mDownloadIds;
     private String mSelectedDownload;
     private UpdaterController mUpdaterController;
     private UpdatesListActivity mActivity;
+
+    private AlertDialog infoDialog;
 
     private enum Action {
         DOWNLOAD,
@@ -128,6 +134,15 @@ public class UpdatesListAdapter extends RecyclerView.Adapter<UpdatesListAdapter.
         View view = LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.update_item_view, viewGroup, false);
         return new ViewHolder(view);
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(ViewHolder holder) {
+        super.onViewDetachedFromWindow(holder);
+
+        if (infoDialog != null) {
+            infoDialog.dismiss();
+        }
     }
 
     public void setUpdaterController(UpdaterController updaterController) {
@@ -549,12 +564,15 @@ public class UpdatesListAdapter extends RecyclerView.Adapter<UpdatesListAdapter.
     }
 
     private void showInfoDialog() {
-        AlertDialog dialog = new AlertDialog.Builder(mActivity)
+        if (infoDialog != null) {
+            infoDialog.dismiss();
+        }
+        infoDialog = new AlertDialog.Builder(mActivity)
                 .setTitle(R.string.blocked_update_dialog_title)
                 .setPositiveButton(android.R.string.ok, null)
                 .setMessage(R.string.blocked_update_dialog_message)
                 .show();
-        TextView textView = (TextView) dialog.findViewById(android.R.id.message);
+        TextView textView = (TextView) infoDialog.findViewById(android.R.id.message);
         textView.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
@@ -607,7 +625,7 @@ public class UpdatesListAdapter extends RecyclerView.Adapter<UpdatesListAdapter.
         int percent = Math.round(100.f * intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 100) /
                 intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100));
         int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
-        int required = (plugged & BatteryManager.BATTERY_PLUGGED_ANY) != 0 ?
+        int required = (plugged & BATTERY_PLUGGED_ANY) != 0 ?
                 mActivity.getResources().getInteger(R.integer.battery_ok_percentage_charging) :
                 mActivity.getResources().getInteger(R.integer.battery_ok_percentage_discharging);
         return percent >= required;

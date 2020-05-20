@@ -23,6 +23,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -31,11 +32,13 @@ import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.preference.PreferenceManager;
 
 import com.aim.updater.R;
 import com.aim.updater.UpdaterReceiver;
 import com.aim.updater.UpdatesActivity;
 import com.aim.updater.misc.BuildInfoUtils;
+import com.aim.updater.misc.Constants;
 import com.aim.updater.misc.StringGenerator;
 import com.aim.updater.misc.Utils;
 import com.aim.updater.model.UpdateInfo;
@@ -127,7 +130,10 @@ public class UpdaterService extends Service {
                     if (extras != null && downloadId.equals(
                             extras.getString(UpdaterController.EXTRA_DOWNLOAD_ID))) {
                         mNotificationBuilder.setExtras(null);
-                        mNotificationManager.cancel(NOTIFICATION_ID);
+                        UpdateInfo update = mUpdaterController.getUpdate(downloadId);
+                        if (update.getStatus() != UpdateStatus.INSTALLED) {
+                            mNotificationManager.cancel(NOTIFICATION_ID);
+                        }
                     }
                 }
             }
@@ -409,6 +415,13 @@ public class UpdaterService extends Service {
                 mNotificationBuilder.setOngoing(true);
                 mNotificationBuilder.setAutoCancel(false);
                 mNotificationManager.notify(NOTIFICATION_ID, mNotificationBuilder.build());
+
+                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+                boolean deleteUpdate = pref.getBoolean(Constants.PREF_AUTO_DELETE_UPDATES, false);
+                if (deleteUpdate) {
+                    mUpdaterController.deleteUpdate(update.getDownloadId());
+                }
+
                 tryStopSelf();
                 break;
             }

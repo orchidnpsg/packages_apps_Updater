@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2017 The LineageOS Project
+     Copyright (C) 2017-2020 The LineageOS Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,11 +14,10 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="installation_suspended_notification">Instalación suspendida</string>
-    <string name="suspend_button">Suspender</string>
-    <string name="menu_auto_updates_check_interval_daily">Una vez al día</string>
-    <string name="menu_auto_updates_check_interval_weekly">Una vez a la semana</string>
-    <string name="menu_auto_updates_check_interval_monthly">Una vez al mes</string>
-    <string name="menu_auto_updates_check_interval_never">Nunca</string>
-</resources>
+<permissions>
+    <privapp-permissions package="com.aim.updater">
+        <permission name="android.permission.ACCESS_CACHE_FILESYSTEM"/>
+        <permission name="android.permission.REBOOT"/>
+        <permission name="android.permission.RECOVERY"/>
+    </privapp-permissions>
+</permissions>
